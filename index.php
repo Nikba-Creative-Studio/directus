@@ -28,9 +28,7 @@
     
     #New Directus
     $api = new Nikba\Directus($config);
-
-    #Load Data
-    $locales_data = $api->getItems("tableName");
+    
 
 
     
