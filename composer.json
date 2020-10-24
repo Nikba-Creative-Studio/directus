@@ -1,0 +1,24 @@
+{
+    "name": "nikba/directus",
+    "description": "Directus 8 PHP SDK",
+    "keywords": ["directus", "sdk", "nikba"],
+    "type": "library",
+    "require-dev": {
+        "php-curl-class/php-curl-class": "^8.8"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bargan Nicolai",
+            "email": "office@nikba.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "files": ["directus/Directus.php" ]
+    },
+    "repositories": [{
+        "type": "git",
+        "url": "https://github.com/Nikba-Creative-Studio/directus"
+    }]
+}
