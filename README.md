@@ -12,8 +12,11 @@ For PHP driven applications, use this SDK to more easily communicate with your D
 
 You can install the SDK using [Composer](https://getcomposer.org/) by adding nikba/directus to your composer.json require list.
 
-     composer require nikba/directus 
-
+    "require": {
+    	"nikba/directus": "dev-main"
+    },
+    "minimum-stability": "dev"
+Then run `composer install`.
 Composer will download all dependencies and copy them into a directory with the name of `vendor`.
 
 To use the SDK you have to include the [composer autoload](https://getcomposer.org/doc/01-basic-usage.md#autoloading). The composer autoload is a file that is located in the `vendor` directory, named `autoload.php`.
