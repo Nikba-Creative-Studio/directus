@@ -3,7 +3,7 @@
     "description": "Directus 8 PHP SDK",
     "keywords": ["directus", "sdk", "nikba"],
     "type": "library",
-    "require-dev": {
+    "require": {
         "php-curl-class/php-curl-class": "^8.8"
     },
     "license": "MIT",
