@@ -24,10 +24,18 @@ class Directus {
     #Class Constructor
     public function __construct($config) {
         $this->accessToken = $config['token'];
-        $this->accessUrl = $config['base'];
+        $this->accessUrl = $config['base'];       
+    }
 
+    #Init Curl
+    public function connect() {
         $this->curl = new Curl();
         $this->curl->setOpt(CURLOPT_HTTPHEADER, array('Authorization: Bearer '.$this->accessToken));
+    }
+
+    #Close Curl
+    public function close() {
+        $this->curl->close();
     }
 
     #Error Log Function
@@ -38,32 +46,44 @@ class Directus {
     #Get Items    
     public function getItems($tableName, array $options = [])
     {        
+        $this->connect();
+
         $this->curl->get($this->accessUrl.self::ITEMS_ENDPOINT.$tableName, $options);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data;
+            $data = $this->curl->response->data;
+            $this->close();
+            return $data;
         }
     }
     
     #Get Item  
     public function getItem($tableName, $id, array $options = [])
     {        
+        $this->connect();
+
         $this->curl->get($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id, $options);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data;
+            $data = $this->curl->response->data;
+            $this->close();
+            return $data;
         }
     }
 
     #Create an Item
     public function postItem($tableName, array $data = [])
-    {        
+    {       
+        $this->connect();
+
         $this->curl->post($this->accessUrl.self::ITEMS_ENDPOINT.$tableName, $data);
         
         if($this->curl->error) {
@@ -76,124 +96,169 @@ class Directus {
 
     #Update an Item
     public function updateItem($tableName, $id, array $data = [])
-    {        
+    {     
+        $this->connect();
+
         $this->curl->patch($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id, $data);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data;
+            $data = $this->curl->response->data;
+            $this->close();
+            return $data;
         }
     }
 
     #Delete an Item
     public function deleteItem($tableName, $id)
     {        
+        $this->connect();
+
         $this->curl->delete($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response;
+            $data = $this->curl->response;
+            $this->close();
+            return $data;
         }
     }
     
     #Get Files  
     public function getFiles(array $options = [])
-    {        
+    {  
+        $this->connect();
+
         $this->curl->get($this->accessUrl.self::FILES_ENDPOINT, $options);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data;
+            $data = $this->curl->response;
+            $this->close();
+            return $data;
         }
     }
     
     #Get File 
     public function getFile($id)
-    {        
+    {    
+        $this->connect();
+
         $this->curl->get($this->accessUrl.self::FILES_ENDPOINT.$id);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response;
+            $data = $this->curl->response;
+            $this->close();
+            return $data;
         }
     }
 
     #Get Asset 
     public function getAssets($id, array $options = [])
-    {        
+    {   
+        $this->connect();
+
         $this->curl->get($this->accessUrl.self::ASSETS_ENDPOINT.$id, $options);
         
         if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response;
+            $data = $this->curl->response;
+            $this->close();
+            return $data;
         }
     }
 
     #Send Email
     public function sendEmail(array $options = [])
     {
+        $this->connect();
+
         $this->curl->post($this->accessUrl.self::MAIL_ENDPOINT, $options);
         
-        if ($this->curl->error) {
+        if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response;
+            $data = $this->curl->response;
+            $this->close();
+            return $data;
         }
     }
 
     #Create a Hash
     public function getHash($string)
     {
+        $this->connect();
+
         $data = [ 'string' => $string ];
         $this->curl->post($this->accessUrl.self::HASH_ENDPOINT, $data);
         
-        if ($this->curl->error) {
+        if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data->hash;
+            $data = $this->curl->response->data->hash;
+            $this->close();
+            return $data;
         }
     }
 
     #Verify a Hashed String
     public function checkHash($string, $hash)
     {
+        $this->connect();
+
         $data = [ 
             'string' => $string,
             'hash'   => $hash
         ];
         $this->curl->post($this->accessUrl.self::CHHASH_ENDPOINT, $data);
         
-        if ($this->curl->error) {
+        if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data->valid;
+            $data = $this->curl->response->data->valid;
+            $this->close();
+            return $data;
         }
     }
 
     #Generate a Random String
     public function getString($lenght=10)
     {
+        $this->connect();
+        
         $data = [ 'length' => $lenght ];
         $this->curl->post($this->accessUrl.self::STRING_ENDPOINT, $data);
         
-        if ($this->curl->error) {
+        if($this->curl->error) {
             $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
         }
         else {
-            return $this->curl->response->data->random;
+            $data = $this->curl->response->data->random;
+            $this->close();
+            return $data;
         }
     }
 
