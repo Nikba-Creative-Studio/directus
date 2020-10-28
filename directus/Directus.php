@@ -13,13 +13,15 @@ use Curl\Curl;
 class Directus {
 
     #End Points
-    const ITEMS_ENDPOINT    = 'items/';
-    const FILES_ENDPOINT    = 'files/';
-    const ASSETS_ENDPOINT   = 'assets/';
-    const MAIL_ENDPOINT     = 'mail';
-    const HASH_ENDPOINT     = 'utils/hash';
-    const CHHASH_ENDPOINT   ='utils/hash/match';
-    const STRING_ENDPOINT   = 'utils/random/string';
+    const ITEMS_ENDPOINT        = 'items/';
+    const FILES_ENDPOINT        = 'files/';
+    const ASSETS_ENDPOINT       = 'assets/';
+    const COLLECTIONS_ENDPOINT  = 'collections';
+    const FIELDS_ENDPOINT       = 'fields';
+    const MAIL_ENDPOINT         = 'mail';
+    const HASH_ENDPOINT         = 'utils/hash';
+    const CHHASH_ENDPOINT       = 'utils/hash/match';
+    const STRING_ENDPOINT       = 'utils/random/string';
 
     #Class Constructor
     public function __construct($config) {
@@ -42,6 +44,10 @@ class Directus {
     public function error_log($errorCode, $errorMessage) {
         die("Error Code: {$errorCode} <br/> Error Message: {$errorMessage}");
     }
+    
+    /*  Items 
+        Returns an array of item objects.
+    */
     
     #Get Items    
     public function getItems($tableName, array $options = [])
@@ -130,6 +136,10 @@ class Directus {
         }
     }
     
+    /*  Files 
+        Returns an array of Files objects.
+    */
+
     #Get Files  
     public function getFiles(array $options = [])
     {  
@@ -183,6 +193,60 @@ class Directus {
             return $data;
         }
     }
+
+    /*  Collections 
+        Returns an array of Collections objects.
+    */
+    
+    #Get Collection    
+    public function getCollections($id=false)
+    {        
+        $this->connect();
+
+        #Individual collection
+        $collectionId = ($id!=false)? '/'.$id : false;
+
+        $this->curl->get($this->accessUrl.self::COLLECTIONS_ENDPOINT.$collectionId);
+        
+        if($this->curl->error) {
+            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
+        }
+        else {
+            $data = $this->curl->response->data;
+            $this->close();
+            return $data;
+        }
+    }
+
+    /*  Fields 
+        Returns an array of Fields objects.
+    */
+    
+    #Get Field    
+    public function getFields($id=false)
+    {        
+        $this->connect();
+
+        #Individual collection
+        $fieldId = ($id!=false)? '/'.$id : false;
+
+        $this->curl->get($this->accessUrl.self::FIELDS_ENDPOINT.$fieldId);
+        
+        if($this->curl->error) {
+            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
+            $this->close();
+        }
+        else {
+            $data = $this->curl->response->data;
+            $this->close();
+            return $data;
+        }
+    }
+
+    /*  Utilities 
+        Various utility you can use to simplify your development flow.
+    */
 
     #Send Email
     public function sendEmail(array $options = [])
