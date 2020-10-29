@@ -4,7 +4,9 @@
     "keywords": ["directus", "sdk", "nikba"],
     "type": "library",
     "require": {
-        "php-curl-class/php-curl-class": "^8.8"
+        "php-curl-class/php-curl-class": "^8.8",
+        "guzzlehttp/guzzle": "^7.0",
+        "directus/utils": "^1.1"
     },
     "license": "MIT",
     "authors": [
@@ -15,7 +17,10 @@
     ],
     "minimum-stability": "stable",
     "autoload": {
-        "files": ["directus/Directus.php" ]
+        "files": [
+                "directus/BaseApi.php",
+                "directus/Directus.php"
+        ]
     },
     "repositories": [{
         "type": "git",
