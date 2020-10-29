@@ -48,7 +48,8 @@ class BaseApi {
     #End Points
     const ITEMS_ENDPOINT        = 'items/%s';
     const ITEM_ENDPOINT         = 'items/%s/%s';
-    const FILES_ENDPOINT        = 'files/%s';
+    const FILES_ENDPOINT        = 'files';
+    const FILE_ENDPOINT         = 'files/%s';
     const ASSETS_ENDPOINT       = 'assets/%s';
     const COLLECTIONS_ENDPOINT  = 'collections';
     const FIELDS_ENDPOINT       = 'fields';
@@ -181,8 +182,17 @@ class BaseApi {
 
         try {
             $response = $this->httpClient->send($request);
-            $content = json_decode($response->getBody()->getContents());
-            #$content = json_decode($response->getBody()->getContents(), true); Return as Array
+            
+            #Return Response as file content
+            if(isset($params['response']) && $params['response']=='asset') {
+                $content = $response->getBody()->getContents();
+            }
+            #Return Response as object
+            else {
+                $content = json_decode($response->getBody()->getContents());
+                #$content = json_decode($response->getBody()->getContents(), true); Return as Array
+            }
+
         } catch (ClientException $ex) {
             if ($ex->getResponse()->getStatusCode() == 401) {
                 if ($this->isPsr7Version()) {
