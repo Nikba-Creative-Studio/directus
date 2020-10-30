@@ -4,7 +4,6 @@
     "keywords": ["directus", "sdk", "nikba"],
     "type": "library",
     "require": {
-        "php-curl-class/php-curl-class": "^8.8",
         "guzzlehttp/guzzle": "^7.0",
         "directus/utils": "^1.1"
     },
