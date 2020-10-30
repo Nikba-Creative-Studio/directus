@@ -3,327 +3,221 @@
 =====================================================
  Copyright (c) 2020 NIKBA.COM
 =====================================================
- File: api.php
+ File: Directus.php
 =====================================================
 */
 namespace Nikba;
 
-use Curl\Curl;
+use Directus\Util\ArrayUtils;
 
-class Directus {
+class Directus extends BaseApi {
 
-    #End Points
-    const ITEMS_ENDPOINT        = 'items/';
-    const FILES_ENDPOINT        = 'files/';
-    const ASSETS_ENDPOINT       = 'assets/';
-    const COLLECTIONS_ENDPOINT  = 'collections';
-    const FIELDS_ENDPOINT       = 'fields';
-    const MAIL_ENDPOINT         = 'mail';
-    const HASH_ENDPOINT         = 'utils/hash';
-    const CHHASH_ENDPOINT       = 'utils/hash/match';
-    const STRING_ENDPOINT       = 'utils/random/string';
-
-    #Class Constructor
-    public function __construct($config) {
-        $this->accessToken = $config['token'];
-        $this->accessUrl = $config['base'];       
-    }
-
-    #Init Curl
-    public function connect() {
-        $this->curl = new Curl();
-        $this->curl->setOpt(CURLOPT_HTTPHEADER, array('Authorization: Bearer '.$this->accessToken));
-    }
-
-    #Close Curl
-    public function close() {
-        $this->curl->close();
-    }
-
-    #Error Log Function
-    public function error_log($errorCode, $errorMessage) {
-        die("Error Code: {$errorCode} <br/> Error Message: {$errorMessage}");
-    }
-    
-    /*  Items 
-        Returns an array of item objects.
-    */
-    
-    #Get Items    
+    /**
+     * Fetch Items from a given table
+     *
+     * @param string $tableName
+     * @param array $options
+     *
+     * @return array $data
+     */
     public function getItems($tableName, array $options = [])
-    {        
-        $this->connect();
-
-        $this->curl->get($this->accessUrl.self::ITEMS_ENDPOINT.$tableName, $options);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data;
-            $this->close();
-            return $data;
-        }
+    {
+        $path = $this->buildPath(static::ITEMS_ENDPOINT, $tableName);
+        $request = $this->performRequest('GET', $path, ['query' => $options]);
+        return $request->data;
     }
-    
-    #Get Item  
+
+    /**
+     * Get an entry in a given table by the given ID
+     *
+     * @param mixed $id
+     * @param string $tableName
+     * @param array $options
+     *
+     * @return array $data
+     */
     public function getItem($tableName, $id, array $options = [])
-    {        
-        $this->connect();
-
-        $this->curl->get($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id, $options);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data;
-            $this->close();
-            return $data;
-        }
+    {
+        $path = $this->buildPath(static::ITEM_ENDPOINT, [$tableName, $id]);
+        $request = $this->performRequest('GET', $path, ['query' => $options]);
+        return $request->data;
     }
 
-    #Create an Item
-    public function postItem($tableName, array $data = [])
-    {       
-        $this->connect();
-
-        $this->curl->post($this->accessUrl.self::ITEMS_ENDPOINT.$tableName, $data);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-        }
-        else {
-            return $this->curl->response->data;
-        }
+    /**
+     * Create a new item in the given table name
+     *
+     * @param $tableName
+     * @param array $data
+     *
+     * @return array $data
+     */
+    public function createItem($tableName, array $data)
+    {
+        $path = $this->buildPath(static::ITEMS_ENDPOINT, $tableName);
+        $data = $this->processData($tableName, $data);
+        $request = $this->performRequest('POST', $path, ['body' => $data]);
+        return $request->data;
     }
 
-    #Update an Item
-    public function updateItem($tableName, $id, array $data = [])
-    {     
-        $this->connect();
-
-        $this->curl->patch($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id, $data);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data;
-            $this->close();
-            return $data;
-        }
+    /**
+     * Update the item of the given table and id
+     *
+     * @param $tableName
+     * @param $id
+     * @param array $data
+     *
+     * @return array $data
+     */
+    public function updateItem($tableName, $id, array $data)
+    {
+        $path = $this->buildPath(static::ITEM_ENDPOINT, [$tableName, $id]);
+        $data = $this->processData($tableName, $data);
+        $request = $this->performRequest('PATCH', $path, ['body' => $data]);
+        return $request->data;
     }
 
-    #Delete an Item
+    /**
+     * Deletes the given item id(s)
+     *
+     * @param string $tableName
+     * @param $id
+     *
+     * @return status code
+     */
     public function deleteItem($tableName, $id)
-    {        
-        $this->connect();
-
-        $this->curl->delete($this->accessUrl.self::ITEMS_ENDPOINT.$tableName."/".$id);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response;
-            $this->close();
-            return $data;
-        }
+    {
+        $path = $this->buildPath(static::ITEM_ENDPOINT, [$tableName, $id]);
+        $request = $this->performRequest('DELETE', $path);
+        return $request;
     }
-    
-    /*  Files 
-        Returns an array of Files objects.
-    */
 
-    #Get Files  
+    /**
+     * Gets a list fo files
+     *
+     * @param array $options - Parameters
+     *
+     * @return array $data
+     */
     public function getFiles(array $options = [])
-    {  
-        $this->connect();
-
-        $this->curl->get($this->accessUrl.self::FILES_ENDPOINT, $options);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response;
-            $this->close();
-            return $data;
-        }
-    }
-    
-    #Get File 
-    public function getFile($id)
-    {    
-        $this->connect();
-
-        $this->curl->get($this->accessUrl.self::FILES_ENDPOINT.$id);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response;
-            $this->close();
-            return $data;
-        }
+    {
+        $path = $this->buildPath(static::FILES_ENDPOINT, []);
+        $request = $this->performRequest('GET', $path, ['query' => $options]);
+        return $request->data;
     }
 
-    #Get Asset 
+    /**
+     * Gets the information of a given file ID
+     *
+     * @param $id
+     *
+     * @return array $data
+     */
+    public function getFile($id, array $options = [])
+    {
+        $path = $this->buildPath(static::FILE_ENDPOINT, [$id]);
+        $request = $this->performRequest('GET', $path, ['query' => $options]);
+        return $request->data;
+    }
+
+    /**
+     * Gets the information of a given asset ID
+     *
+     * @param $id
+     *
+     * @return file
+     */
     public function getAssets($id, array $options = [])
-    {   
-        $this->connect();
-
-        $this->curl->get($this->accessUrl.self::ASSETS_ENDPOINT.$id, $options);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response;
-            $this->close();
-            return $data;
-        }
-    }
-
-    /*  Collections 
-        Returns an array of Collections objects.
-    */
-    
-    #Get Collection    
-    public function getCollections($id=false)
-    {        
-        $this->connect();
-
-        #Individual collection
-        $collectionId = ($id!=false)? '/'.$id : false;
-
-        $this->curl->get($this->accessUrl.self::COLLECTIONS_ENDPOINT.$collectionId);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data;
-            $this->close();
-            return $data;
-        }
-    }
-
-    /*  Fields 
-        Returns an array of Fields objects.
-    */
-    
-    #Get Field    
-    public function getFields($id=false)
-    {        
-        $this->connect();
-
-        #Individual collection
-        $fieldId = ($id!=false)? '/'.$id : false;
-
-        $this->curl->get($this->accessUrl.self::FIELDS_ENDPOINT.$fieldId);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data;
-            $this->close();
-            return $data;
-        }
-    }
-
-    /*  Utilities 
-        Various utility you can use to simplify your development flow.
-    */
-
-    #Send Email
-    public function sendEmail(array $options = [])
     {
-        $this->connect();
-
-        $this->curl->post($this->accessUrl.self::MAIL_ENDPOINT, $options);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response;
-            $this->close();
-            return $data;
-        }
+        $path = $this->buildPath(static::ASSETS_ENDPOINT, [$id]);
+        $request = $this->performRequest('GET', $path, ['query' => $options, 'response' => 'asset']);
+        @header("Content-Type: image/jpeg");
+        return $request;
     }
 
-    #Create a Hash
-    public function getHash($string)
+    /**
+     * Gets a hashed value from the given string
+     *
+     * @param string $string
+     * @param array $options
+     *
+     * @return string $hash
+     */
+    public function getHash($string, array $options = [])
     {
-        $this->connect();
+        $path = $this->buildPath(static::HASH_ENDPOINT);
 
-        $data = [ 'string' => $string ];
-        $this->curl->post($this->accessUrl.self::HASH_ENDPOINT, $data);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
+        $data = [
+            'string' => $string
+        ];
+
+        if (ArrayUtils::has($options, 'hasher')) {
+            $data['hasher'] = ArrayUtils::pull($options, 'hasher');
         }
-        else {
-            $data = $this->curl->response->data->hash;
-            $this->close();
-            return $data;
-        }
+
+        $data['options'] = $options;
+
+        $request = $this->performRequest('POST', $path, ['body' => $data]);
+        return $request->data->hash;
     }
 
-    #Verify a Hashed String
+    /**
+     * Compare a hashed value with string
+     *
+     * @param string $string
+     * @param array $hash
+     *
+     * @return 1 = true
+     */
     public function checkHash($string, $hash)
     {
-        $this->connect();
+        $path = $this->buildPath(static::CHHASH_ENDPOINT);
 
         $data = [ 
             'string' => $string,
             'hash'   => $hash
         ];
-        $this->curl->post($this->accessUrl.self::CHHASH_ENDPOINT, $data);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data->valid;
-            $this->close();
-            return $data;
-        }
+
+        $request = $this->performRequest('POST', $path, ['body' => $data]);
+        return $request->data->valid;
     }
 
-    #Generate a Random String
-    public function getString($lenght=10)
+    /**
+     * Gets a random alphanumeric string
+     *
+     * @param array $options
+     *
+     * @return string $random
+     */
+    public function getRandom(array $options = [])
     {
-        $this->connect();
-        
-        $data = [ 'length' => $lenght ];
-        $this->curl->post($this->accessUrl.self::STRING_ENDPOINT, $data);
-        
-        if($this->curl->error) {
-            $this->error_log($this->curl->errorCode, $this->curl->errorMessage);
-            $this->close();
-        }
-        else {
-            $data = $this->curl->response->data->random;
-            $this->close();
-            return $data;
-        }
+        $path = $this->buildPath(static::STRING_ENDPOINT);
+
+        $request = $this->performRequest('POST', $path, ['body' => $options]);
+        return $request->data->random;
+    }
+
+    /**
+     * Send an Email
+     *
+     * @param array $options
+     *
+     * $option = [
+     *              "to" => "office@nikba.com",
+     *              "subject"=> "test",
+     *              "body" => "Hello <b>{{name}}</b>, this is your new password {{password}}.",
+     *              "data" => [
+     *                  "name" =>"John Doe",
+     *                  "password" => "secret"
+     *              ]
+     *             ];
+     * @return status code
+     */
+    public function sendEmail(array $options = [])
+    {
+        $path = $this->buildPath(static::MAIL_ENDPOINT);
+
+        $request = $this->performRequest('POST', $path, ['body' => $options]);
+        return $request;
     }
 
 }

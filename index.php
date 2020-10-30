@@ -23,11 +23,17 @@
     #Load Directus
     $config = [
         'token' => 'API TOKEN',
-        'base'  => 'https://nikba.com/project/'
+        'base'  => 'DIRECTUS PROJECT URL'
     ];
+    
     
     #New Directus
     $api = new Nikba\Directus($config);
+
+    $items = $api->getItems('item');
+    var_dump($items);
+    
+
     
 
 
