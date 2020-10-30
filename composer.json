@@ -17,10 +17,9 @@
     ],
     "minimum-stability": "stable",
     "autoload": {
-        "files": [
-                "directus/BaseApi.php",
-                "directus/Directus.php"
-        ]
+        "psr-4": {
+            "Nikba\\": "directus/"
+        }
     },
     "repositories": [{
         "type": "git",

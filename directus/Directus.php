@@ -18,7 +18,7 @@ class Directus extends BaseApi {
      * @param string $tableName
      * @param array $options
      *
-     * @return Items Array
+     * @return array $data
      */
     public function getItems($tableName, array $options = [])
     {
@@ -34,7 +34,7 @@ class Directus extends BaseApi {
      * @param string $tableName
      * @param array $options
      *
-     * @return Item Array
+     * @return array $data
      */
     public function getItem($tableName, $id, array $options = [])
     {
@@ -44,11 +44,59 @@ class Directus extends BaseApi {
     }
 
     /**
+     * Create a new item in the given table name
+     *
+     * @param $tableName
+     * @param array $data
+     *
+     * @return array $data
+     */
+    public function createItem($tableName, array $data)
+    {
+        $path = $this->buildPath(static::ITEMS_ENDPOINT, $tableName);
+        $data = $this->processData($tableName, $data);
+        $request = $this->performRequest('POST', $path, ['body' => $data]);
+        return $request->data;
+    }
+
+    /**
+     * Update the item of the given table and id
+     *
+     * @param $tableName
+     * @param $id
+     * @param array $data
+     *
+     * @return array $data
+     */
+    public function updateItem($tableName, $id, array $data)
+    {
+        $path = $this->buildPath(static::ITEM_ENDPOINT, [$tableName, $id]);
+        $data = $this->processData($tableName, $data);
+        $request = $this->performRequest('PATCH', $path, ['body' => $data]);
+        return $request->data;
+    }
+
+    /**
+     * Deletes the given item id(s)
+     *
+     * @param string $tableName
+     * @param $id
+     *
+     * @return status code
+     */
+    public function deleteItem($tableName, $id)
+    {
+        $path = $this->buildPath(static::ITEM_ENDPOINT, [$tableName, $id]);
+        $request = $this->performRequest('DELETE', $path);
+        return $request;
+    }
+
+    /**
      * Gets a list fo files
      *
      * @param array $options - Parameters
      *
-     * @return Files Array
+     * @return array $data
      */
     public function getFiles(array $options = [])
     {
@@ -62,7 +110,7 @@ class Directus extends BaseApi {
      *
      * @param $id
      *
-     * @return File Array
+     * @return array $data
      */
     public function getFile($id, array $options = [])
     {
@@ -76,7 +124,7 @@ class Directus extends BaseApi {
      *
      * @param $id
      *
-     * @return Asset
+     * @return file
      */
     public function getAssets($id, array $options = [])
     {
@@ -92,7 +140,7 @@ class Directus extends BaseApi {
      * @param string $string
      * @param array $options
      *
-     * @return String
+     * @return string $hash
      */
     public function getHash($string, array $options = [])
     {
@@ -138,7 +186,7 @@ class Directus extends BaseApi {
      *
      * @param array $options
      *
-     * @return String
+     * @return string $random
      */
     public function getRandom(array $options = [])
     {
@@ -162,7 +210,7 @@ class Directus extends BaseApi {
      *                  "password" => "secret"
      *              ]
      *             ];
-     * @return String
+     * @return status code
      */
     public function sendEmail(array $options = [])
     {

@@ -22,33 +22,17 @@
 
     #Load Directus
     $config = [
-        'token' => 'AKCLyrU8Db4Av4DEQkHNrCl5',
-        'base'  => 'https://cms.tophost.md/tophost/'
+        'token' => 'API TOKEN',
+        'base'  => 'DIRECTUS PROJECT URL'
     ];
     
     
     #New Directus
     $api = new Nikba\Directus($config);
-    
-    /**
-     * Get Items
-     * 
-    
-    $headers = $api->getItems("headers");
-    foreach($headers as $row) {
-        echo $row->id;
-    }
-    */
 
-    /**
-     * Get Item
-     *
-    $header = $api->getItem("headers",1);
-    print_r($header);
-    */
-
-    $header = $api->getFiles();
-    print_r($header);
+    $items = $api->getItems('item');
+    var_dump($items);
+    
 
     
 

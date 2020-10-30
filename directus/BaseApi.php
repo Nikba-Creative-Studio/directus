@@ -8,7 +8,9 @@
 */
 namespace Nikba;
 
+use Nikba\Exception\UnauthorizedRequestException;
 use Directus\Util\ArrayUtils;
+use Directus\Util\StringUtils;
 use GuzzleHttp\Client as HTTPClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;
@@ -45,20 +47,17 @@ class BaseApi {
      */
     protected $timeout = 60;
 
-    #End Points
     const ITEMS_ENDPOINT        = 'items/%s';
     const ITEM_ENDPOINT         = 'items/%s/%s';
     const FILES_ENDPOINT        = 'files';
     const FILE_ENDPOINT         = 'files/%s';
     const ASSETS_ENDPOINT       = 'assets/%s';
-    const COLLECTIONS_ENDPOINT  = 'collections';
-    const FIELDS_ENDPOINT       = 'fields';
     const MAIL_ENDPOINT         = 'mail';
     const HASH_ENDPOINT         = 'utils/hash';
     const CHHASH_ENDPOINT       = 'utils/hash/match';
     const STRING_ENDPOINT       = 'utils/random/string';
 
-    #Class Constructor
+    
     public function __construct($config) {
         $this->accessToken  = $config['token'];
         $this->accessUrl    = rtrim($config['base'], '/');   
@@ -107,15 +106,6 @@ class BaseApi {
         $this->accessToken = $newAccessToken;
     }
 
-    /**
-     * Get the Directus hosted instance key
-     *
-     * @return null|string
-     */
-    public function getInstanceKey()
-    {
-        return $this->instanceKey;
-    }
 
     /**
      * Set the HTTP Client
@@ -151,7 +141,6 @@ class BaseApi {
         ]);
     }
 
-
     /**
      * Build a endpoint path based on a format
      *
@@ -172,7 +161,7 @@ class BaseApi {
      * @param $path
      * @param array $params
      *
-     * @return Entry|EntryCollection
+     * @return array $content
      *
      * @throws UnauthorizedRequestException
      */
@@ -195,14 +184,8 @@ class BaseApi {
 
         } catch (ClientException $ex) {
             if ($ex->getResponse()->getStatusCode() == 401) {
-                if ($this->isPsr7Version()) {
-                    $uri = $request->getUri();
-                } else {
-                    $uri = $request->getUrl();
-                }
-
+                $uri = $request->getUri();
                 $message = sprintf('Unauthorized %s Request to %s', $request->getMethod(), $uri);
-
                 throw new UnauthorizedRequestException($message);
             }
 
@@ -239,7 +222,7 @@ class BaseApi {
     }
 
     /**
-     * Creates a request for 5.x or 6.x guzzle version
+     * Creates a request for 7.x guzzle version
      *
      * @param $method
      * @param $path
@@ -279,4 +262,23 @@ class BaseApi {
 
         return $request;
     }
+
+    /**
+     * Creates a request object
+     *
+     * @param $tableName
+     * @param $data
+     *
+     * @return array $data
+     */
+    protected function processData($tableName, array $data)
+    {
+        $method = 'processDataOn' . StringUtils::underscoreToCamelCase($tableName, true);
+        if (method_exists($this, $method)) {
+            $data = call_user_func_array([$this, $method], [$data]);
+        }
+
+        return $data;
+    }
+
 }
