@@ -130,7 +130,7 @@ class Directus extends BaseApi {
     {
         $path = $this->buildPath(static::ASSETS_ENDPOINT, [$id]);
         $request = $this->performRequest('GET', $path, ['query' => $options, 'response' => 'asset']);
-        @header("Content-Type: image/jpeg");
+        #@header("Content-Type: image/jpeg");
         return $request;
     }
 
