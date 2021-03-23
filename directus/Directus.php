@@ -1,14 +1,14 @@
 <?php
 /*
 =====================================================
- Copyright (c) 2020 NIKBA.COM
+ Copyright (c) 2021 NIKBA.COM
 =====================================================
  File: Directus.php
 =====================================================
 */
 namespace Nikba;
 
-use Directus\Util\ArrayUtils;
+use Nikba\ArrayUtils;
 
 class Directus extends BaseApi {
 

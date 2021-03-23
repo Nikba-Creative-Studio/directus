@@ -1,7 +1,7 @@
 <?php
 /*
 =====================================================
- Copyright (c) 2020 NIKBA.COM
+ Copyright (c) 2021 NIKBA.COM
 =====================================================
  File: BaseApi.php
 =====================================================
@@ -9,8 +9,8 @@
 namespace Nikba;
 
 use Nikba\Exception\UnauthorizedRequestException;
-use Directus\Util\ArrayUtils;
-use Directus\Util\StringUtils;
+use Nikba\ArrayUtils;
+use Nikba\StringUtils;
 use GuzzleHttp\Client as HTTPClient;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Psr7\Request;

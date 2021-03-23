@@ -4,8 +4,7 @@
     "keywords": ["directus", "sdk", "nikba"],
     "type": "library",
     "require": {
-        "guzzlehttp/guzzle": "^7.0",
-        "directus/utils": "^1.1"
+        "guzzlehttp/guzzle": "^7.0"
     },
     "license": "MIT",
     "authors": [
